@@ -11,14 +11,26 @@ class MoviesController < ApplicationController
   end
 
   def index
-    if session[:sorting_mechanism] == "title"
-      @movies = @movies.sort! { |a,b| a.title <=> b.title }
-      @movie_highlight = "hilite"
-    elsif session[:sorting_mechanism] == "release_date"
-      @movies = @movies.sort! { |a,b| a.release_date <=> b.release_date }
-      @date_highlight = "hilite"
-    else
-       @movies = Movie.all
+    #@movies = Movie.all
+    if params.key?(:sort_by) #instead of using order i make use of sort_by
+			session[:sort_by] = params[:sort_by] #instead of using order i make use of sort_by
+		elsif session.key?(:sort_by)
+			params[:sort_by] = session[:sort_by] #instead of using order i make use of sort_by
+			redirect_to movies_path(params) and return
+		end
+		
+		@hilite = sort_by = session[:sort_by]
+		
+		@all_ratings = Movie.all_ratings #same as the thing above but now includes ratings
+		if params.key?(:ratings)
+			session[:ratings] = params[:ratings]
+		elsif session.key?(:ratings)
+			params[:ratings] = session[:ratings]
+			redirect_to movies_path(params) and return
+		end
+		
+		@checked_ratings = (session[:ratings].keys if session.key?(:ratings)) || @all_ratings
+    @movies = Movie.order(sort_by).where(rating: @checked_ratings)
   end
 
   def new
