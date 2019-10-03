@@ -11,7 +11,14 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    if session[:sorting_mechanism] == "title"
+      @movies = @movies.sort! { |a,b| a.title <=> b.title }
+      @movie_highlight = "hilite"
+    elsif session[:sorting_mechanism] == "release_date"
+      @movies = @movies.sort! { |a,b| a.release_date <=> b.release_date }
+      @date_highlight = "hilite"
+    else
+       @movies = Movie.all
   end
 
   def new
