@@ -12,24 +12,26 @@ class MoviesController < ApplicationController
 
   def index
     #@movies = Movie.all
+    @all_ratings = Movie.all_ratings
     if params.key?(:sort_by) #instead of using order i make use of sort_by
-			session[:sort_by] = params[:sort_by] #instead of using order i make use of sort_by
+			session[:sort_by] = params[:sort_by] #instead of using order i make use of sort_by, updates the sorting mechanism
 		elsif session.key?(:sort_by)
-			params[:sort_by] = session[:sort_by] #instead of using order i make use of sort_by
+			params[:sort_by] = session[:sort_by] #instead of using order i make use of sort_by, updates the sorting mechanism
 			redirect_to movies_path(params) and return
 		end
 		
-		@hilite = sort_by = session[:sort_by]
+		@hilite = sort_by = session[:sort_by] #hilite used in application
 		
-		@all_ratings = Movie.all_ratings #same as the thing above but now includes ratings
-		if params.key?(:ratings)
+		#same as the thing above but now includes ratings
+		if params.key?(:ratings) #if the person using the app has selected 1 or more rating, update the session
 			session[:ratings] = params[:ratings]
 		elsif session.key?(:ratings)
-			params[:ratings] = session[:ratings]
+			params[:ratings] = session[:ratings] #filter the movies if there are any ratings in session hash
 			redirect_to movies_path(params) and return
 		end
 		
 		@checked_ratings = (session[:ratings].keys if session.key?(:ratings)) || @all_ratings
+		#properly ordering the movies
     @movies = Movie.order(sort_by).where(rating: @checked_ratings)
   end
 
